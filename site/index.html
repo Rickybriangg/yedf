@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>RecoverIQ — Automation Layer (Milestone 1 demo)</title>
+<style>
+  :root{
+    --bg:#0e1116; --panel:#161b22; --panel2:#1c232c; --line:#2a323d;
+    --text:#e6edf3; --muted:#9aa7b4; --accent:#3b82f6; --accent2:#22c55e;
+    --amber:#f59e0b; --red:#ef4444; --violet:#8b5cf6; --chip:#22303f;
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#f6f8fa; --panel:#ffffff; --panel2:#f0f3f6; --line:#d8dee4;
+      --text:#1f2328; --muted:#59636e; --accent:#0969da; --accent2:#1a7f37;
+      --amber:#9a6700; --red:#cf222e; --violet:#6639ba; --chip:#eaeef2;
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);
+    font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
+  a{color:var(--accent)}
+  .wrap{max-width:1100px;margin:0 auto;padding:28px 20px 64px}
+  header.top{display:flex;flex-wrap:wrap;align-items:flex-start;gap:16px;justify-content:space-between;margin-bottom:8px}
+  h1{font-size:22px;margin:0 0 2px}
+  .sub{color:var(--muted);font-size:14px;margin:0}
+  .pill{display:inline-block;font-size:12px;font-weight:600;padding:2px 10px;border-radius:999px;background:var(--chip);color:var(--muted)}
+  .repo-link{font-size:13px}
+  .banner{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--accent);
+    border-radius:10px;padding:12px 14px;margin:16px 0 22px;color:var(--muted);font-size:13.5px}
+  .controls{display:flex;flex-wrap:wrap;gap:12px;align-items:end;background:var(--panel);
+    border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:20px}
+  .controls label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px;font-weight:600}
+  input[type=date]{background:var(--panel2);color:var(--text);border:1px solid var(--line);
+    border-radius:8px;padding:8px 10px;font:inherit}
+  button{cursor:pointer;font:inherit;font-weight:600;border-radius:8px;padding:9px 16px;border:1px solid transparent}
+  .btn-primary{background:var(--accent);color:#fff}
+  .btn-ghost{background:var(--panel2);color:var(--text);border-color:var(--line)}
+  button:active{transform:translateY(1px)}
+  .grow{flex:1}
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:8px}
+  .kpi{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+  .kpi .n{font-size:26px;font-weight:700;line-height:1.1}
+  .kpi .l{font-size:12px;color:var(--muted);margin-top:2px}
+  .runline{font-size:13px;color:var(--muted);margin:14px 2px 26px;min-height:18px}
+  .runline b{color:var(--text)}
+  section h2{font-size:15px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin:30px 0 12px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  .scroll{overflow-x:auto}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;white-space:nowrap}
+  th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line)}
+  th{color:var(--muted);font-size:11.5px;text-transform:uppercase;letter-spacing:.04em;font-weight:700}
+  tr:last-child td{border-bottom:none}
+  td.reason{white-space:normal;color:var(--muted);font-size:12.5px;min-width:280px}
+  .tier{font-weight:700}
+  .badge{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px}
+  .b-performing{background:rgba(148,163,184,.18);color:var(--muted)}
+  .b-curable{background:rgba(34,197,94,.16);color:var(--accent2)}
+  .b-atrisk{background:rgba(245,158,11,.18);color:var(--amber)}
+  .b-doubtful{background:rgba(239,68,68,.16);color:var(--red)}
+  .b-impaired{background:rgba(139,92,246,.18);color:var(--violet)}
+  .flag{font-size:11px;font-weight:700;padding:1px 7px;border-radius:6px;background:var(--chip);color:var(--muted);margin-left:4px}
+  .flag.paused{color:var(--amber)}
+  .flag.dnc{color:var(--red)}
+  .st{font-weight:700}
+  .st-Scheduled{color:var(--accent)}
+  .st-Sent{color:var(--accent2)}
+  .st-Skipped{color:var(--muted)}
+  .st-Pending{color:var(--amber)}
+  code{background:var(--panel2);padding:1px 5px;border-radius:5px;font-size:12.5px}
+  .empty{padding:22px 16px;color:var(--muted);font-size:13.5px}
+  footer{margin-top:44px;color:var(--muted);font-size:12.5px;border-top:1px solid var(--line);padding-top:16px}
+  .legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1>RecoverIQ — Automation Layer</h1>
+      <p class="sub">Milestone 1 · Rule engine + nightly re-tiering job <span class="pill">live in-browser demo</span></p>
+    </div>
+    <div style="text-align:right">
+      <div class="repo-link"><a href="https://github.com/Rickybriangg/yedf" target="_blank" rel="noopener">Rickybriangg/yedf ↗</a></div>
+      <div class="sub" style="margin-top:4px">FastAPI · SQLAlchemy · SQLite</div>
+    </div>
+  </header>
+
+  <div class="banner">
+    This page runs a faithful <b>client-side port</b> of the Python engine (<code>tiering.py</code> +
+    <code>rule_engine.py</code> + <code>run_daily</code>) so you can see it work with no server. The real
+    backend — the same logic, plus the append-only audit DB and REST API — runs locally with
+    <code>uvicorn app.main:app</code>. Nothing here contacts a real SMS/payment/CRB provider.
+  </div>
+
+  <div class="controls">
+    <div>
+      <label for="runDate">Run date (“today”)</label>
+      <input type="date" id="runDate" value="2026-07-23" />
+    </div>
+    <button class="btn-primary" id="runBtn">▶ Run nightly job</button>
+    <button class="btn-ghost" id="againBtn">Run again (same date)</button>
+    <span class="grow"></span>
+    <button class="btn-ghost" id="resetBtn">Reset demo</button>
+  </div>
+
+  <div class="kpis">
+    <div class="kpi"><div class="n" id="k-total">0</div><div class="l">Events logged</div></div>
+    <div class="kpi"><div class="n" id="k-sched">0</div><div class="l">Scheduled to send</div></div>
+    <div class="kpi"><div class="n" id="k-pending">0</div><div class="l">Pending approval</div></div>
+    <div class="kpi"><div class="n" id="k-skipped">0</div><div class="l">Skipped (opt-out)</div></div>
+    <div class="kpi"><div class="n" id="k-runs">0</div><div class="l">Job runs</div></div>
+  </div>
+  <div class="runline" id="runline">Press <b>Run nightly job</b> to re-tier every loan and evaluate the rules.</div>
+
+  <section>
+    <h2>Loans — re-tiered for the run date</h2>
+    <div class="card scroll"><table id="loansTbl">
+      <thead><tr><th>Loan</th><th>Borrower</th><th>Product</th><th>Outstanding</th>
+        <th>Days past due</th><th>Tier</th><th>Bucket</th><th>Flags</th></tr></thead>
+      <tbody></tbody></table></div>
+  </section>
+
+  <section>
+    <h2>Automation rules — configurable data, not code</h2>
+    <div class="card scroll"><table id="rulesTbl">
+      <thead><tr><th>#</th><th>Name</th><th>Condition</th><th>Action</th><th>Channel</th>
+        <th>Cooldown</th><th>Approval</th></tr></thead>
+      <tbody></tbody></table></div>
+  </section>
+
+  <section>
+    <h2>Automation event log — append-only audit</h2>
+    <div class="card scroll"><table id="eventsTbl">
+      <thead><tr><th>#</th><th>Run date</th><th>Loan</th><th>Rule</th><th>Action / channel</th>
+        <th>Status</th><th>Reason</th></tr></thead>
+      <tbody><tr><td colspan="7" class="empty">No events yet — run the job.</td></tr></tbody></table></div>
+    <div class="legend">
+      <span class="badge b-curable">idempotent: re-running adds nothing</span>
+      <span class="badge b-atrisk">paused loans skipped silently</span>
+      <span class="badge b-doubtful">doNotContact → Skipped, not sent</span>
+      <span class="badge b-impaired">FlagForCRB → pending, never auto-sent</span>
+    </div>
+  </section>
+
+  <footer>
+    RecoverIQ Automation Layer · Milestone 1 of 7. Standalone offline build — no provider credentials.
+    Source &amp; the Python API: <a href="https://github.com/Rickybriangg/yedf" target="_blank" rel="noopener">github.com/Rickybriangg/yedf</a>.
+  </footer>
+</div>
+
+<script>
+"use strict";
+/* ------------------------------------------------------------------ *
+ * Faithful browser port of the Python Milestone-1 engine.
+ * Mirrors app/tiering.py, app/rule_engine.py and app/automation.py.
+ * ------------------------------------------------------------------ */
+const DAY = 86400000;
+const SEED_TODAY = new Date("2026-07-23T00:00:00Z");
+const iso = (dt) => dt.toISOString().slice(0,10);
+const parse = (s) => new Date(s + "T00:00:00Z");
+const daysBetween = (a,b) => Math.round((a - b)/DAY);      // a,b are Date
+const dAgo = (n) => iso(new Date(SEED_TODAY.getTime() - n*DAY));
+
+/* ---- tiering.py ---- */
+const daysPastDue = (dueISO, runISO) => daysBetween(parse(runISO), parse(dueISO));
+function recoveryTier(dpd){
+  if (dpd <= 0) return "Performing";
+  if (dpd <= 30) return "Curable";
+  if (dpd <= 90) return "At-risk";
+  if (dpd <= 180) return "Doubtful";
+  return "Impaired";
+}
+function arrearsBucket(dpd){
+  if (dpd <= 0) return "Current";
+  if (dpd <= 30) return "1-30";
+  if (dpd <= 60) return "31-60";
+  if (dpd <= 90) return "61-90";
+  if (dpd <= 180) return "91-180";
+  return "180+";
+}
+const dormancyDays = (loan,runISO) =>
+  daysBetween(parse(runISO), parse(loan.lastPaymentDate || loan.disbursedDate));
+const daysSinceLastAction = (loan,runISO) =>
+  daysBetween(parse(runISO), parse(loan.lastActionDate || loan.disbursedDate));
+
+/* ---- rule_engine.py ---- */
+const ALLOWED = new Set(["loanNo","tier","arrearsBucket","dormancyDays","daysPastDue",
+  "daysSinceLastAction","product","outstandingBalance"]);
+const OPS = {
+  eq:(a,b)=>a===b, ne:(a,b)=>a!==b, gt:(a,b)=>a>b, gte:(a,b)=>a>=b,
+  lt:(a,b)=>a<b, lte:(a,b)=>a<=b, in:(a,b)=>b.includes(a), nin:(a,b)=>!b.includes(a),
+};
+function matchField(fact, spec){
+  if (spec && typeof spec === "object" && !Array.isArray(spec)){
+    for (const [op,operand] of Object.entries(spec)){
+      const fn = OPS[op];
+      if (!fn) throw new Error("Unknown operator '"+op+"'");
+      if (fact === null || fact === undefined) return false;
+      if (typeof fact !== typeof operand && !(op==="in"||op==="nin"))
+        throw new Error("Type mismatch for '"+op+"'");
+      if (!fn(fact, operand)) return false;
+    }
+    return true;
+  }
+  if (Array.isArray(spec)) return spec.includes(fact);
+  return fact === spec;
+}
+function matchCondition(facts, cond){
+  for (const [field,spec] of Object.entries(cond)){
+    if (!ALLOWED.has(field)) throw new Error("Unknown field '"+field+"'");
+    if (!matchField(facts[field], spec)) return false;
+  }
+  return true;
+}
+
+/* ---- automation.py ---- */
+const CONTACT = new Set(["SMS","USSD","Email","Letter"]);
+function computeFacts(loan, runISO){
+  return {
+    loanNo: loan.loanNo, tier: loan.recoveryTier, arrearsBucket: loan.arrearsBucket,
+    dormancyDays: loan.dormancyDays, daysPastDue: daysPastDue(loan.dueDate, runISO),
+    daysSinceLastAction: daysSinceLastAction(loan, runISO),
+    product: loan.product, outstandingBalance: loan.outstandingBalance,
+  };
+}
+function explain(rule, f){
+  return `Matched rule '${rule.name}' [${rule.action}/${rule.channel}] — tier=${f.tier}, `+
+         `daysPastDue=${f.daysPastDue}, daysSinceLastAction=${f.daysSinceLastAction}`;
+}
+function retier(loan, runISO){
+  const dpd = daysPastDue(loan.dueDate, runISO);
+  loan.recoveryTier = recoveryTier(dpd);
+  loan.arrearsBucket = arrearsBucket(dpd);
+  loan.dormancyDays = dormancyDays(loan, runISO);
+  loan.dpd = dpd;
+}
+function runDaily(state, runISO){
+  const s = {run_date:runISO, created:0, skipped_paused:0, skipped_cooldown:0,
+             skipped_duplicate:0, rule_errors:0};
+  state.loans.forEach(l => retier(l, runISO));   // step 1: re-tier all
+
+  for (const loan of state.loans){
+    if (loan.automationPaused){ s.skipped_paused++; continue; }
+    const facts = computeFacts(loan, runISO);
+    for (const rule of state.rules){
+      if (!rule.active) continue;
+      let matched;
+      try { matched = matchCondition(facts, rule.condition); }
+      catch(e){ s.rule_errors++; continue; }
+      if (!matched) continue;
+
+      const key = `${rule.id}:${loan.loanNo}:${runISO}`;
+      if (state.events.some(e => e.triggerKey === key)){ s.skipped_duplicate++; continue; }
+
+      if (rule.cooldownDays > 0){
+        const prior = state.events
+          .filter(e => e.ruleId===rule.id && e.loanNo===loan.loanNo &&
+                       (e.status==="Scheduled"||e.status==="Sent"))
+          .sort((a,b)=> a.runISO < b.runISO ? 1 : -1)[0];
+        if (prior && daysBetween(parse(runISO), parse(prior.runISO)) < rule.cooldownDays){
+          s.skipped_cooldown++; continue;
+        }
+      }
+
+      // guardrails applied at "send" time
+      let status, reason = explain(rule, facts);
+      if (CONTACT.has(rule.channel) && loan.doNotContact){
+        status = "Skipped"; reason = "Opt-out (doNotContact) — " + reason;
+      } else if (rule.requiresApproval){
+        status = "Pending"; reason = "Pending manager approval — " + reason;
+      } else {
+        status = "Scheduled";
+      }
+      state.events.push({
+        id: state.events.length+1, loanNo: loan.loanNo, ruleId: rule.id,
+        ruleName: rule.name, action: rule.action, channel: rule.channel,
+        status, reason, runISO, triggerKey: key,
+      });
+      s.created++;
+    }
+  }
+  state.runs++;
+  return s;
+}
+
+/* ---- seed data (mirrors app/seed.py) ---- */
+function seed(){
+  return {
+    runs:0, events:[],
+    rules:[
+      {id:1,name:"Curable early reminder",active:true,
+       condition:{tier:"Curable",daysPastDue:{gte:1,lte:3}},
+       action:"SendReminder",channel:"SMS",cooldownDays:3,requiresApproval:false},
+      {id:2,name:"At-risk weekly nudge",active:true,
+       condition:{tier:"At-risk",daysSinceLastAction:{gte:7}},
+       action:"SendReminder",channel:"SMS",cooldownDays:7,requiresApproval:false},
+      {id:3,name:"Doubtful demand letter",active:true,
+       condition:{tier:"Doubtful"},
+       action:"GenerateLetter",channel:"Letter",cooldownDays:30,requiresApproval:false},
+      {id:4,name:"Doubtful CRB recommendation",active:true,
+       condition:{tier:"Doubtful",daysSinceLastAction:{gte:21}},
+       action:"FlagForCRB",channel:"InApp",cooldownDays:90,requiresApproval:true},
+    ],
+    loans:[
+      {loanNo:"L-1001",borrowerName:"Amina Yusuf",product:"Business",outstandingBalance:15000,
+       disbursedDate:dAgo(60),dueDate:dAgo(2),lastPaymentDate:dAgo(35),lastActionDate:dAgo(2),
+       automationPaused:false,doNotContact:false},
+      {loanNo:"L-1002",borrowerName:"Brian Otieno",product:"Personal",outstandingBalance:48000,
+       disbursedDate:dAgo(200),dueDate:dAgo(45),lastPaymentDate:dAgo(50),lastActionDate:dAgo(20),
+       automationPaused:false,doNotContact:false},
+      {loanNo:"L-1003",borrowerName:"Carol Wanjiru",product:"Business",outstandingBalance:120000,
+       disbursedDate:dAgo(400),dueDate:dAgo(120),lastPaymentDate:dAgo(130),lastActionDate:dAgo(25),
+       automationPaused:false,doNotContact:false},
+      {loanNo:"L-1004",borrowerName:"Daniel Kimani",product:"Personal",outstandingBalance:8000,
+       disbursedDate:dAgo(40),dueDate:dAgo(2),lastPaymentDate:null,lastActionDate:dAgo(2),
+       automationPaused:true,doNotContact:false},
+      {loanNo:"L-1005",borrowerName:"Esther Njeri",product:"Personal",outstandingBalance:9500,
+       disbursedDate:dAgo(45),dueDate:dAgo(2),lastPaymentDate:null,lastActionDate:dAgo(2),
+       automationPaused:false,doNotContact:true},
+    ],
+  };
+}
+
+/* ---- rendering ---- */
+let STATE = seed();
+const $ = (id) => document.getElementById(id);
+const tierClass = (t) => "b-" + t.toLowerCase().replace("-","");
+const money = (n) => "KES " + n.toLocaleString();
+
+function render(summary){
+  // KPIs
+  const ev = STATE.events;
+  $("k-total").textContent = ev.length;
+  $("k-sched").textContent = ev.filter(e=>e.status==="Scheduled").length;
+  $("k-pending").textContent = ev.filter(e=>e.status==="Pending").length;
+  $("k-skipped").textContent = ev.filter(e=>e.status==="Skipped").length;
+  $("k-runs").textContent = STATE.runs;
+
+  // loans
+  const runISO = $("runDate").value;
+  STATE.loans.forEach(l => retier(l, runISO));
+  $("loansTbl").querySelector("tbody").innerHTML = STATE.loans.map(l=>{
+    const flags = (l.automationPaused?'<span class="flag paused">paused</span>':'')
+                + (l.doNotContact?'<span class="flag dnc">do-not-contact</span>':'');
+    return `<tr>
+      <td><code>${l.loanNo}</code></td><td>${l.borrowerName}</td><td>${l.product}</td>
+      <td>${money(l.outstandingBalance)}</td><td>${l.dpd}</td>
+      <td class="tier"><span class="badge ${tierClass(l.recoveryTier)}">${l.recoveryTier}</span></td>
+      <td>${l.arrearsBucket}</td><td>${flags||'—'}</td></tr>`;
+  }).join("");
+
+  // rules
+  $("rulesTbl").querySelector("tbody").innerHTML = STATE.rules.map(r=>`<tr>
+      <td>${r.id}</td><td>${r.name}</td>
+      <td><code>${JSON.stringify(r.condition)}</code></td>
+      <td>${r.action}</td><td>${r.channel}</td>
+      <td>${r.cooldownDays}d</td>
+      <td>${r.requiresApproval?'✔ manager':'—'}</td></tr>`).join("");
+
+  // events (newest first)
+  const body = $("eventsTbl").querySelector("tbody");
+  if (!ev.length){
+    body.innerHTML = '<tr><td colspan="7" class="empty">No events yet — run the job.</td></tr>';
+  } else {
+    body.innerHTML = ev.slice().reverse().map(e=>`<tr>
+      <td>${e.id}</td><td>${e.runISO}</td><td><code>${e.loanNo}</code></td>
+      <td>${e.ruleName}</td><td>${e.action} / ${e.channel}</td>
+      <td class="st st-${e.status}">${e.status}</td>
+      <td class="reason">${e.reason}</td></tr>`).join("");
+  }
+
+  // run summary line
+  if (summary){
+    $("runline").innerHTML =
+      `Ran for <b>${summary.run_date}</b> — created <b>${summary.created}</b>, `+
+      `skipped <b>${summary.skipped_duplicate}</b> duplicate (idempotency), `+
+      `<b>${summary.skipped_cooldown}</b> in cooldown, `+
+      `<b>${summary.skipped_paused}</b> paused loan(s).`;
+  }
+}
+
+function run(){ const s = runDaily(STATE, $("runDate").value); render(s); }
+$("runBtn").onclick = run;
+$("againBtn").onclick = run;
+$("resetBtn").onclick = () => { STATE = seed();
+  $("runline").innerHTML = "Demo reset. Press <b>Run nightly job</b> to start again.";
+  render(null); };
+
+render(null);
+</script>
+</body>
+</html>

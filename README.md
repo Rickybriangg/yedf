@@ -1,5 +1,9 @@
 # RecoverIQ — Automation Layer
 
+**▶ Live demo:** https://rickybriangg.github.io/yedf/ — a faithful browser port of
+the Milestone 1 engine (re-tiering + rule matching + `run_daily`), running with
+no server. The real Python API below runs the same logic locally.
+
 An automated recovery-workflow engine for RecoverIQ. The principle: automation
 handles high-volume, low-judgement work (reminders, routing, escalation, letter
 generation, payment links, CRB submission) so human officers only spend time on
