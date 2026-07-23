@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>RecoverIQ — Automation Layer (Milestone 1 demo)</title>
+<title>RecoverIQ — Automation Dashboard</title>
 <style>
   :root{
     --bg:#0e1116; --panel:#161b22; --panel2:#1c232c; --line:#2a323d;
@@ -21,39 +21,43 @@
   body{margin:0;background:var(--bg);color:var(--text);
     font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
   a{color:var(--accent)}
-  .wrap{max-width:1100px;margin:0 auto;padding:28px 20px 64px}
-  header.top{display:flex;flex-wrap:wrap;align-items:flex-start;gap:16px;justify-content:space-between;margin-bottom:8px}
+  .wrap{max-width:1180px;margin:0 auto;padding:26px 20px 64px}
+  header.top{display:flex;flex-wrap:wrap;align-items:flex-start;gap:16px;justify-content:space-between}
   h1{font-size:22px;margin:0 0 2px}
   .sub{color:var(--muted);font-size:14px;margin:0}
   .pill{display:inline-block;font-size:12px;font-weight:600;padding:2px 10px;border-radius:999px;background:var(--chip);color:var(--muted)}
-  .repo-link{font-size:13px}
   .banner{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--accent);
-    border-radius:10px;padding:12px 14px;margin:16px 0 22px;color:var(--muted);font-size:13.5px}
-  .controls{display:flex;flex-wrap:wrap;gap:12px;align-items:end;background:var(--panel);
-    border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:20px}
+    border-radius:10px;padding:11px 14px;margin:16px 0 20px;color:var(--muted);font-size:13px}
+  .controls{display:flex;flex-wrap:wrap;gap:10px;align-items:end;background:var(--panel);
+    border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:18px}
   .controls label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px;font-weight:600}
-  input[type=date]{background:var(--panel2);color:var(--text);border:1px solid var(--line);
-    border-radius:8px;padding:8px 10px;font:inherit}
-  button{cursor:pointer;font:inherit;font-weight:600;border-radius:8px;padding:9px 16px;border:1px solid transparent}
+  input[type=date],input[type=number]{background:var(--panel2);color:var(--text);border:1px solid var(--line);
+    border-radius:8px;padding:8px 10px;font:inherit;width:150px}
+  input[type=number]{width:80px}
+  button{cursor:pointer;font:inherit;font-weight:600;border-radius:8px;padding:8px 14px;border:1px solid transparent}
   .btn-primary{background:var(--accent);color:#fff}
   .btn-ghost{background:var(--panel2);color:var(--text);border-color:var(--line)}
+  .btn-sm{padding:4px 10px;font-size:12px}
+  .btn-ok{background:var(--accent2);color:#fff}
+  .btn-no{background:var(--red);color:#fff}
   button:active{transform:translateY(1px)}
   .grow{flex:1}
-  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:8px}
-  .kpi{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
-  .kpi .n{font-size:26px;font-weight:700;line-height:1.1}
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:6px}
+  .kpi{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:13px 15px}
+  .kpi .n{font-size:24px;font-weight:700;line-height:1.1}
   .kpi .l{font-size:12px;color:var(--muted);margin-top:2px}
-  .runline{font-size:13px;color:var(--muted);margin:14px 2px 26px;min-height:18px}
+  .kpi.hero{border-color:var(--accent)}
+  .kpi.hero .n{color:var(--accent)}
+  .runline{font-size:13px;color:var(--muted);margin:14px 2px 24px;min-height:18px}
   .runline b{color:var(--text)}
-  section h2{font-size:15px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin:30px 0 12px}
+  section h2{font-size:14px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin:28px 0 10px}
   .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden}
   .scroll{overflow-x:auto}
-  table{width:100%;border-collapse:collapse;font-size:13.5px;white-space:nowrap}
-  th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line)}
-  th{color:var(--muted);font-size:11.5px;text-transform:uppercase;letter-spacing:.04em;font-weight:700}
+  table{width:100%;border-collapse:collapse;font-size:13px;white-space:nowrap}
+  th,td{text-align:left;padding:9px 13px;border-bottom:1px solid var(--line)}
+  th{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.04em;font-weight:700}
   tr:last-child td{border-bottom:none}
-  td.reason{white-space:normal;color:var(--muted);font-size:12.5px;min-width:280px}
-  .tier{font-weight:700}
+  td.reason{white-space:normal;color:var(--muted);font-size:12px;min-width:260px}
   .badge{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px}
   .b-performing{background:rgba(148,163,184,.18);color:var(--muted)}
   .b-curable{background:rgba(34,197,94,.16);color:var(--accent2)}
@@ -61,37 +65,36 @@
   .b-doubtful{background:rgba(239,68,68,.16);color:var(--red)}
   .b-impaired{background:rgba(139,92,246,.18);color:var(--violet)}
   .flag{font-size:11px;font-weight:700;padding:1px 7px;border-radius:6px;background:var(--chip);color:var(--muted);margin-left:4px}
-  .flag.paused{color:var(--amber)}
-  .flag.dnc{color:var(--red)}
+  .flag.paused{color:var(--amber)} .flag.dnc{color:var(--red)} .flag.review{color:var(--violet)}
   .st{font-weight:700}
-  .st-Scheduled{color:var(--accent)}
-  .st-Sent{color:var(--accent2)}
-  .st-Skipped{color:var(--muted)}
-  .st-Pending{color:var(--amber)}
-  code{background:var(--panel2);padding:1px 5px;border-radius:5px;font-size:12.5px}
-  .empty{padding:22px 16px;color:var(--muted);font-size:13.5px}
-  footer{margin-top:44px;color:var(--muted);font-size:12.5px;border-top:1px solid var(--line);padding-top:16px}
-  .legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+  .st-Scheduled{color:var(--accent)} .st-Sent{color:var(--accent2)} .st-Skipped{color:var(--muted)}
+  .st-Pending{color:var(--amber)} .st-Cancelled{color:var(--red)}
+  code{background:var(--panel2);padding:1px 5px;border-radius:5px;font-size:12px}
+  .empty{padding:20px 14px;color:var(--muted);font-size:13px}
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media (max-width:820px){.cols{grid-template-columns:1fr}}
+  footer{margin-top:40px;color:var(--muted);font-size:12px;border-top:1px solid var(--line);padding-top:14px}
+  .miles{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header class="top">
     <div>
-      <h1>RecoverIQ — Automation Layer</h1>
-      <p class="sub">Milestone 1 · Rule engine + nightly re-tiering job <span class="pill">live in-browser demo</span></p>
+      <h1>RecoverIQ — Automation Dashboard</h1>
+      <p class="sub">All 7 milestones · rules · escalation · payments · CRB approvals <span class="pill">live in-browser demo</span></p>
     </div>
     <div style="text-align:right">
-      <div class="repo-link"><a href="https://github.com/Rickybriangg/yedf" target="_blank" rel="noopener">Rickybriangg/yedf ↗</a></div>
+      <div style="font-size:13px"><a href="https://github.com/Rickybriangg/yedf" target="_blank" rel="noopener">Rickybriangg/yedf ↗</a></div>
       <div class="sub" style="margin-top:4px">FastAPI · SQLAlchemy · SQLite</div>
     </div>
   </header>
 
   <div class="banner">
-    This page runs a faithful <b>client-side port</b> of the Python engine (<code>tiering.py</code> +
-    <code>rule_engine.py</code> + <code>run_daily</code>) so you can see it work with no server. The real
-    backend — the same logic, plus the append-only audit DB and REST API — runs locally with
-    <code>uvicorn app.main:app</code>. Nothing here contacts a real SMS/payment/CRB provider.
+    A faithful <b>client-side port</b> of the Python engine (re-tiering, rule matching, the escalation state
+    machine, payment-stop and recommend-only CRB approvals). Advance the date and run the job to watch cases
+    escalate; simulate a payment to stop escalation; approve a CRB recommendation — nothing here is auto-fired.
+    The real backend runs the same logic with a REST API and an append-only audit DB. No external providers.
   </div>
 
   <div class="controls">
@@ -100,19 +103,39 @@
       <input type="date" id="runDate" value="2026-07-23" />
     </div>
     <button class="btn-primary" id="runBtn">▶ Run nightly job</button>
-    <button class="btn-ghost" id="againBtn">Run again (same date)</button>
+    <button class="btn-ghost" id="skipBtn">＋7 days &amp; run</button>
+    <div>
+      <label for="mpi">Mins/item (KPI)</label>
+      <input type="number" id="mpi" value="4" min="1" max="60" />
+    </div>
     <span class="grow"></span>
     <button class="btn-ghost" id="resetBtn">Reset demo</button>
   </div>
 
   <div class="kpis">
+    <div class="kpi hero"><div class="n" id="k-hours">0.0</div><div class="l">Hours automated / wk (est.)</div></div>
     <div class="kpi"><div class="n" id="k-total">0</div><div class="l">Events logged</div></div>
-    <div class="kpi"><div class="n" id="k-sched">0</div><div class="l">Scheduled to send</div></div>
-    <div class="kpi"><div class="n" id="k-pending">0</div><div class="l">Pending approval</div></div>
-    <div class="kpi"><div class="n" id="k-skipped">0</div><div class="l">Skipped (opt-out)</div></div>
+    <div class="kpi"><div class="n" id="k-sent">0</div><div class="l">Sent</div></div>
+    <div class="kpi"><div class="n" id="k-pending">0</div><div class="l">Pending approvals</div></div>
+    <div class="kpi"><div class="n" id="k-review">0</div><div class="l">Cases to review</div></div>
     <div class="kpi"><div class="n" id="k-runs">0</div><div class="l">Job runs</div></div>
   </div>
-  <div class="runline" id="runline">Press <b>Run nightly job</b> to re-tier every loan and evaluate the rules.</div>
+  <div class="runline" id="runline">Press <b>Run nightly job</b>, then <b>＋7 days &amp; run</b> a few times to watch cases escalate.</div>
+
+  <div class="cols">
+    <section>
+      <h2>Recovery cases — escalation state machine</h2>
+      <div class="card scroll"><table id="casesTbl">
+        <thead><tr><th>Case</th><th>Loan</th><th>Tier</th><th>Stage</th><th>Status</th><th></th></tr></thead>
+        <tbody></tbody></table></div>
+    </section>
+    <section>
+      <h2>Pending approvals — recommend-only (CRB / legal)</h2>
+      <div class="card scroll"><table id="apprTbl">
+        <thead><tr><th>Loan</th><th>Kind</th><th>Reason</th><th>Decision</th></tr></thead>
+        <tbody></tbody></table></div>
+    </section>
+  </div>
 
   <section>
     <h2>Loans — re-tiered for the run date</h2>
@@ -123,271 +146,273 @@
   </section>
 
   <section>
-    <h2>Automation rules — configurable data, not code</h2>
-    <div class="card scroll"><table id="rulesTbl">
-      <thead><tr><th>#</th><th>Name</th><th>Condition</th><th>Action</th><th>Channel</th>
-        <th>Cooldown</th><th>Approval</th></tr></thead>
+    <h2>Success / failure by channel</h2>
+    <div class="card scroll"><table id="chanTbl">
+      <thead><tr><th>Channel</th><th>Sent</th><th>Scheduled</th><th>Skipped</th><th>Cancelled</th></tr></thead>
       <tbody></tbody></table></div>
   </section>
 
   <section>
     <h2>Automation event log — append-only audit</h2>
     <div class="card scroll"><table id="eventsTbl">
-      <thead><tr><th>#</th><th>Run date</th><th>Loan</th><th>Rule</th><th>Action / channel</th>
+      <thead><tr><th>#</th><th>Date</th><th>Loan</th><th>Source</th><th>Action / channel</th>
         <th>Status</th><th>Reason</th></tr></thead>
       <tbody><tr><td colspan="7" class="empty">No events yet — run the job.</td></tr></tbody></table></div>
-    <div class="legend">
-      <span class="badge b-curable">idempotent: re-running adds nothing</span>
-      <span class="badge b-atrisk">paused loans skipped silently</span>
-      <span class="badge b-doubtful">doNotContact → Skipped, not sent</span>
-      <span class="badge b-impaired">FlagForCRB → pending, never auto-sent</span>
-    </div>
   </section>
 
   <footer>
-    RecoverIQ Automation Layer · Milestone 1 of 7. Standalone offline build — no provider credentials.
+    RecoverIQ Automation Layer — all 7 milestones. Standalone offline build, no provider credentials.
     Source &amp; the Python API: <a href="https://github.com/Rickybriangg/yedf" target="_blank" rel="noopener">github.com/Rickybriangg/yedf</a>.
+    <div class="miles">
+      <span class="badge b-curable">idempotent re-runs</span>
+      <span class="badge b-atrisk">paused &amp; opt-out respected</span>
+      <span class="badge b-doubtful">payment stops escalation</span>
+      <span class="badge b-impaired">CRB never auto-fired</span>
+    </div>
   </footer>
 </div>
 
 <script>
 "use strict";
-/* ------------------------------------------------------------------ *
- * Faithful browser port of the Python Milestone-1 engine.
- * Mirrors app/tiering.py, app/rule_engine.py and app/automation.py.
- * ------------------------------------------------------------------ */
+/* Browser port of the Python engine (tiering + rule_engine + automation +
+   escalation + payments + crb). Mirrors app/*.py behaviour. */
 const DAY = 86400000;
 const SEED_TODAY = new Date("2026-07-23T00:00:00Z");
 const iso = (dt) => dt.toISOString().slice(0,10);
 const parse = (s) => new Date(s + "T00:00:00Z");
-const daysBetween = (a,b) => Math.round((a - b)/DAY);      // a,b are Date
+const daysBetween = (a,b) => Math.round((a-b)/DAY);
 const dAgo = (n) => iso(new Date(SEED_TODAY.getTime() - n*DAY));
 
-/* ---- tiering.py ---- */
-const daysPastDue = (dueISO, runISO) => daysBetween(parse(runISO), parse(dueISO));
-function recoveryTier(dpd){
-  if (dpd <= 0) return "Performing";
-  if (dpd <= 30) return "Curable";
-  if (dpd <= 90) return "At-risk";
-  if (dpd <= 180) return "Doubtful";
-  return "Impaired";
-}
-function arrearsBucket(dpd){
-  if (dpd <= 0) return "Current";
-  if (dpd <= 30) return "1-30";
-  if (dpd <= 60) return "31-60";
-  if (dpd <= 90) return "61-90";
-  if (dpd <= 180) return "91-180";
-  return "180+";
-}
-const dormancyDays = (loan,runISO) =>
-  daysBetween(parse(runISO), parse(loan.lastPaymentDate || loan.disbursedDate));
-const daysSinceLastAction = (loan,runISO) =>
-  daysBetween(parse(runISO), parse(loan.lastActionDate || loan.disbursedDate));
+/* ---- tiering ---- */
+const dpdOf = (dueISO, runISO) => daysBetween(parse(runISO), parse(dueISO));
+const tierOf = (d) => d<=0?"Performing":d<=30?"Curable":d<=90?"At-risk":d<=180?"Doubtful":"Impaired";
+const bucketOf = (d) => d<=0?"Current":d<=30?"1-30":d<=60?"31-60":d<=90?"61-90":d<=180?"91-180":"180+";
+const dormOf = (l,r)=>daysBetween(parse(r),parse(l.lastPaymentDate||l.disbursedDate));
+const dslaOf = (l,r)=>daysBetween(parse(r),parse(l.lastActionDate||l.disbursedDate));
 
-/* ---- rule_engine.py ---- */
-const ALLOWED = new Set(["loanNo","tier","arrearsBucket","dormancyDays","daysPastDue",
-  "daysSinceLastAction","product","outstandingBalance"]);
-const OPS = {
-  eq:(a,b)=>a===b, ne:(a,b)=>a!==b, gt:(a,b)=>a>b, gte:(a,b)=>a>=b,
-  lt:(a,b)=>a<b, lte:(a,b)=>a<=b, in:(a,b)=>b.includes(a), nin:(a,b)=>!b.includes(a),
-};
-function matchField(fact, spec){
-  if (spec && typeof spec === "object" && !Array.isArray(spec)){
-    for (const [op,operand] of Object.entries(spec)){
-      const fn = OPS[op];
-      if (!fn) throw new Error("Unknown operator '"+op+"'");
-      if (fact === null || fact === undefined) return false;
-      if (typeof fact !== typeof operand && !(op==="in"||op==="nin"))
-        throw new Error("Type mismatch for '"+op+"'");
-      if (!fn(fact, operand)) return false;
-    }
+/* ---- rule matcher ---- */
+const OPS={eq:(a,b)=>a===b,ne:(a,b)=>a!==b,gt:(a,b)=>a>b,gte:(a,b)=>a>=b,lt:(a,b)=>a<b,lte:(a,b)=>a<=b,in:(a,b)=>b.includes(a),nin:(a,b)=>!b.includes(a)};
+function matchField(f,spec){
+  if(spec&&typeof spec==="object"&&!Array.isArray(spec)){
+    for(const[op,v] of Object.entries(spec)){const fn=OPS[op];if(!fn)return false;if(f==null)return false;if(!fn(f,v))return false;}
     return true;
   }
-  if (Array.isArray(spec)) return spec.includes(fact);
-  return fact === spec;
+  if(Array.isArray(spec))return spec.includes(f);
+  return f===spec;
 }
-function matchCondition(facts, cond){
-  for (const [field,spec] of Object.entries(cond)){
-    if (!ALLOWED.has(field)) throw new Error("Unknown field '"+field+"'");
-    if (!matchField(facts[field], spec)) return false;
-  }
-  return true;
-}
+const matchCond=(facts,cond)=>Object.entries(cond).every(([k,v])=>matchField(facts[k],v));
 
-/* ---- automation.py ---- */
-const CONTACT = new Set(["SMS","USSD","Email","Letter"]);
-function computeFacts(loan, runISO){
+/* ---- escalation paths (mirror seed) ---- */
+const ESC_PATHS={
+  "Curable":[{label:"SMS reminder",action:"SendReminder",channel:"SMS",offsetDays:0},
+             {label:"SMS follow-up",action:"SendReminder",channel:"SMS",offsetDays:3}],
+  "At-risk":[{label:"SMS reminder",action:"SendReminder",channel:"SMS",offsetDays:0},
+             {label:"Call task",action:"Call-task",channel:"InApp",offsetDays:3},
+             {label:"Demand letter",action:"GenerateLetter",channel:"Letter",offsetDays:10}],
+  "Doubtful":[{label:"Demand letter",action:"GenerateLetter",channel:"Letter",offsetDays:0},
+              {label:"Guarantor contact",action:"GuarantorContact",channel:"InApp",offsetDays:7},
+              {label:"CRB recommendation",action:"CRB-recommend",channel:"InApp",offsetDays:21}],
+  "Impaired":[{label:"Legal handoff recommendation",action:"LegalHandoff-recommend",channel:"InApp",offsetDays:0}],
+};
+const CONTACT=new Set(["SMS","USSD","Email","Letter"]);
+
+/* ---- seed ---- */
+function seed(){
   return {
-    loanNo: loan.loanNo, tier: loan.recoveryTier, arrearsBucket: loan.arrearsBucket,
-    dormancyDays: loan.dormancyDays, daysPastDue: daysPastDue(loan.dueDate, runISO),
-    daysSinceLastAction: daysSinceLastAction(loan, runISO),
-    product: loan.product, outstandingBalance: loan.outstandingBalance,
+    runs:0, events:[], approvals:[], actions:[], nextApprId:1,
+    rules:[
+      {id:1,name:"Curable early reminder",active:true,condition:{tier:"Curable",daysPastDue:{gte:1,lte:3}},action:"SendReminder",channel:"SMS",cooldownDays:3,requiresApproval:false},
+      {id:2,name:"At-risk weekly nudge",active:true,condition:{tier:"At-risk",daysSinceLastAction:{gte:7}},action:"SendReminder",channel:"SMS",cooldownDays:7,requiresApproval:false},
+      {id:3,name:"Doubtful demand letter",active:true,condition:{tier:"Doubtful"},action:"GenerateLetter",channel:"Letter",cooldownDays:30,requiresApproval:false},
+      {id:4,name:"Doubtful CRB recommendation",active:true,condition:{tier:"Doubtful",daysSinceLastAction:{gte:21}},action:"FlagForCRB",channel:"InApp",cooldownDays:90,requiresApproval:true},
+    ],
+    loans:[
+      {loanNo:"L-1001",borrowerName:"Amina Yusuf",product:"Business",outstandingBalance:15000,disbursedDate:dAgo(60),dueDate:dAgo(2),lastPaymentDate:dAgo(35),lastActionDate:dAgo(2),automationPaused:false,doNotContact:false},
+      {loanNo:"L-1002",borrowerName:"Brian Otieno",product:"Personal",outstandingBalance:48000,disbursedDate:dAgo(200),dueDate:dAgo(45),lastPaymentDate:dAgo(50),lastActionDate:dAgo(20),automationPaused:false,doNotContact:false},
+      {loanNo:"L-1003",borrowerName:"Carol Wanjiru",product:"Business",outstandingBalance:120000,disbursedDate:dAgo(400),dueDate:dAgo(120),lastPaymentDate:dAgo(130),lastActionDate:dAgo(25),automationPaused:false,doNotContact:false},
+      {loanNo:"L-1004",borrowerName:"Daniel Kimani",product:"Personal",outstandingBalance:8000,disbursedDate:dAgo(40),dueDate:dAgo(2),lastPaymentDate:null,lastActionDate:dAgo(2),automationPaused:true,doNotContact:false},
+      {loanNo:"L-1005",borrowerName:"Esther Njeri",product:"Personal",outstandingBalance:9500,disbursedDate:dAgo(45),dueDate:dAgo(2),lastPaymentDate:null,lastActionDate:dAgo(2),automationPaused:false,doNotContact:true},
+    ],
+    cases:[], // {id,loanNo,tier,stageIdx,stage,enteredStageAt,pathEnteredAt,status,flagged,reviewReason}
   };
 }
-function explain(rule, f){
-  return `Matched rule '${rule.name}' [${rule.action}/${rule.channel}] — tier=${f.tier}, `+
-         `daysPastDue=${f.daysPastDue}, daysSinceLastAction=${f.daysSinceLastAction}`;
+
+function retier(l,r){const d=dpdOf(l.dueDate,r);l.dpd=d;l.recoveryTier=tierOf(d);l.arrearsBucket=bucketOf(d);l.dormancyDays=dormOf(l,r);}
+function facts(l,r){return{loanNo:l.loanNo,tier:l.recoveryTier,arrearsBucket:l.arrearsBucket,dormancyDays:l.dormancyDays,daysPastDue:dpdOf(l.dueDate,r),daysSinceLastAction:dslaOf(l,r),product:l.product,outstandingBalance:l.outstandingBalance};}
+
+function addEvent(S,e){e.id=S.events.length+1;S.events.push(e);}
+function openApproval(S,loanNo,kind,reason){
+  if(S.approvals.some(a=>a.loanNo===loanNo&&a.kind===kind&&a.status==="Pending"))return;
+  S.approvals.push({id:S.nextApprId++,loanNo,kind,reason,status:"Pending",decidedBy:null});
 }
-function retier(loan, runISO){
-  const dpd = daysPastDue(loan.dueDate, runISO);
-  loan.recoveryTier = recoveryTier(dpd);
-  loan.arrearsBucket = arrearsBucket(dpd);
-  loan.dormancyDays = dormancyDays(loan, runISO);
-  loan.dpd = dpd;
+function hasResponseSince(S,loanNo,sinceISO){
+  return S.actions.some(a=>a.loanNo===loanNo && (a.type==="Payment received"||a.type==="Borrower responded") && a.date>=sinceISO);
 }
-function runDaily(state, runISO){
-  const s = {run_date:runISO, created:0, skipped_paused:0, skipped_cooldown:0,
-             skipped_duplicate:0, rule_errors:0};
-  state.loans.forEach(l => retier(l, runISO));   // step 1: re-tier all
 
-  for (const loan of state.loans){
-    if (loan.automationPaused){ s.skipped_paused++; continue; }
-    const facts = computeFacts(loan, runISO);
-    for (const rule of state.rules){
-      if (!rule.active) continue;
-      let matched;
-      try { matched = matchCondition(facts, rule.condition); }
-      catch(e){ s.rule_errors++; continue; }
-      if (!matched) continue;
+function performStage(S,cs,loan,stage,idx,runISO){
+  const key=`esc:${cs.id}:${cs.pathEnteredAt}:${idx}`;
+  if(S.events.some(e=>e.triggerKey===key))return;
+  let status="Scheduled", reason=`Escalation stage ${idx} (${stage.label}) for case #${cs.id} [${loan.recoveryTier}]`;
+  if(CONTACT.has(stage.channel)&&loan.doNotContact){status="Skipped";reason="Opt-out (doNotContact) — "+reason;}
+  else if(["SendReminder","SMS","USSD"].includes(stage.action)){status="Sent";}
+  else if(["CRB-recommend","FlagForCRB"].includes(stage.action)){openApproval(S,loan.loanNo,"CRB",reason);reason="Pending manager approval (CRB) — "+reason;}
+  else if(["LegalHandoff-recommend"].includes(stage.action)){openApproval(S,loan.loanNo,"Legal",reason);reason="Pending manager approval (Legal) — "+reason;}
+  else if(["Notify","Call-task","GuarantorContact"].includes(stage.action)){status="Sent";}
+  addEvent(S,{loanNo:loan.loanNo,source:"escalation",action:stage.action,channel:stage.channel,status,reason,runISO,triggerKey:key});
+}
 
-      const key = `${rule.id}:${loan.loanNo}:${runISO}`;
-      if (state.events.some(e => e.triggerKey === key)){ s.skipped_duplicate++; continue; }
+function advanceCases(S,runISO){
+  for(const loan of S.loans){
+    if(loan.automationPaused) continue;
+    let cs=S.cases.find(c=>c.loanNo===loan.loanNo);
+    if(!cs){cs={id:S.cases.length+1,loanNo:loan.loanNo,tier:null,stageIdx:null,stage:null,enteredStageAt:null,pathEnteredAt:null,status:"Open",flagged:false,reviewReason:null};S.cases.push(cs);}
+    if(cs.status!=="Open") continue;
+    const tier=loan.recoveryTier, path=ESC_PATHS[tier];
+    if(!path) continue;
+    if(cs.stageIdx===null||cs.tier!==tier){
+      cs.tier=tier;cs.pathEnteredAt=runISO;cs.stageIdx=0;cs.enteredStageAt=runISO;cs.stage=path[0].label;
+      performStage(S,cs,loan,path[0],0,runISO); continue;
+    }
+    if(hasResponseSince(S,loan.loanNo,cs.enteredStageAt)){
+      cs.status="ReviewToClose";cs.flagged=true;cs.reviewReason="Payment/response logged — review to close"; continue;
+    }
+    const t=daysBetween(parse(runISO),parse(cs.enteredStageAt)), idx=cs.stageIdx;
+    if(idx+1<path.length){
+      const dwell=Math.max(path[idx+1].offsetDays-path[idx].offsetDays,1);
+      if(t>=dwell){cs.stageIdx=idx+1;cs.enteredStageAt=runISO;cs.stage=path[idx+1].label;performStage(S,cs,loan,path[idx+1],idx+1,runISO);}
+      else if(t>=2*dwell){cs.flagged=true;cs.reviewReason=`Stalled — ${t}d in stage (2x ${dwell}d dwell)`;}
+    } else {
+      const prev=idx>0?path[idx-1].offsetDays:0, dwell=Math.max(path[idx].offsetDays-prev,7);
+      if(t>=2*dwell&&!cs.flagged){cs.flagged=true;cs.reviewReason=`Stalled — ${t}d in final stage`;}
+    }
+  }
+}
 
-      if (rule.cooldownDays > 0){
-        const prior = state.events
-          .filter(e => e.ruleId===rule.id && e.loanNo===loan.loanNo &&
-                       (e.status==="Scheduled"||e.status==="Sent"))
-          .sort((a,b)=> a.runISO < b.runISO ? 1 : -1)[0];
-        if (prior && daysBetween(parse(runISO), parse(prior.runISO)) < rule.cooldownDays){
-          s.skipped_cooldown++; continue;
-        }
+function runDaily(S,runISO){
+  const s={created:0,skipped_duplicate:0,skipped_cooldown:0,skipped_paused:0};
+  S.loans.forEach(l=>retier(l,runISO));
+  for(const loan of S.loans){
+    if(loan.automationPaused){s.skipped_paused++;continue;}
+    const f=facts(loan,runISO);
+    for(const rule of S.rules){
+      if(!rule.active) continue;
+      if(!matchCond(f,rule.condition)) continue;
+      const key=`${rule.id}:${loan.loanNo}:${runISO}`;
+      if(S.events.some(e=>e.triggerKey===key)){s.skipped_duplicate++;continue;}
+      if(rule.cooldownDays>0){
+        const prior=S.events.filter(e=>e.ruleId===rule.id&&e.loanNo===loan.loanNo&&(e.status==="Sent"||e.status==="Scheduled")).sort((a,b)=>a.runISO<b.runISO?1:-1)[0];
+        if(prior&&daysBetween(parse(runISO),parse(prior.runISO))<rule.cooldownDays){s.skipped_cooldown++;continue;}
       }
-
-      // guardrails applied at "send" time
-      let status, reason = explain(rule, facts);
-      if (CONTACT.has(rule.channel) && loan.doNotContact){
-        status = "Skipped"; reason = "Opt-out (doNotContact) — " + reason;
-      } else if (rule.requiresApproval){
-        status = "Pending"; reason = "Pending manager approval — " + reason;
-      } else {
-        status = "Scheduled";
-      }
-      state.events.push({
-        id: state.events.length+1, loanNo: loan.loanNo, ruleId: rule.id,
-        ruleName: rule.name, action: rule.action, channel: rule.channel,
-        status, reason, runISO, triggerKey: key,
-      });
+      let status="Scheduled",reason=`Matched rule '${rule.name}' [${rule.action}/${rule.channel}] — tier=${f.tier}, daysPastDue=${f.daysPastDue}, daysSinceLastAction=${f.daysSinceLastAction}`;
+      if(CONTACT.has(rule.channel)&&loan.doNotContact){status="Skipped";reason="Opt-out (doNotContact) — "+reason;}
+      else if(rule.action==="FlagForCRB"||rule.requiresApproval){openApproval(S,loan.loanNo,rule.action==="FlagForCRB"?"CRB":"Legal",reason);status="Scheduled";reason="Pending manager approval — "+reason;}
+      else if(rule.action==="SendReminder"||rule.action==="SendPaymentLink"){status="Sent";}
+      else if(rule.action==="GenerateLetter"){status="Scheduled";reason="Queued for letter batch — "+reason;}
+      else if(rule.action==="Notify"){status="Sent";}
+      addEvent(S,{loanNo:loan.loanNo,ruleId:rule.id,source:"rule",action:rule.action,channel:rule.channel,status,reason,runISO,triggerKey:key});
       s.created++;
     }
   }
-  state.runs++;
+  advanceCases(S,runISO);
+  S.runs++;
   return s;
 }
 
-/* ---- seed data (mirrors app/seed.py) ---- */
-function seed(){
-  return {
-    runs:0, events:[],
-    rules:[
-      {id:1,name:"Curable early reminder",active:true,
-       condition:{tier:"Curable",daysPastDue:{gte:1,lte:3}},
-       action:"SendReminder",channel:"SMS",cooldownDays:3,requiresApproval:false},
-      {id:2,name:"At-risk weekly nudge",active:true,
-       condition:{tier:"At-risk",daysSinceLastAction:{gte:7}},
-       action:"SendReminder",channel:"SMS",cooldownDays:7,requiresApproval:false},
-      {id:3,name:"Doubtful demand letter",active:true,
-       condition:{tier:"Doubtful"},
-       action:"GenerateLetter",channel:"Letter",cooldownDays:30,requiresApproval:false},
-      {id:4,name:"Doubtful CRB recommendation",active:true,
-       condition:{tier:"Doubtful",daysSinceLastAction:{gte:21}},
-       action:"FlagForCRB",channel:"InApp",cooldownDays:90,requiresApproval:true},
-    ],
-    loans:[
-      {loanNo:"L-1001",borrowerName:"Amina Yusuf",product:"Business",outstandingBalance:15000,
-       disbursedDate:dAgo(60),dueDate:dAgo(2),lastPaymentDate:dAgo(35),lastActionDate:dAgo(2),
-       automationPaused:false,doNotContact:false},
-      {loanNo:"L-1002",borrowerName:"Brian Otieno",product:"Personal",outstandingBalance:48000,
-       disbursedDate:dAgo(200),dueDate:dAgo(45),lastPaymentDate:dAgo(50),lastActionDate:dAgo(20),
-       automationPaused:false,doNotContact:false},
-      {loanNo:"L-1003",borrowerName:"Carol Wanjiru",product:"Business",outstandingBalance:120000,
-       disbursedDate:dAgo(400),dueDate:dAgo(120),lastPaymentDate:dAgo(130),lastActionDate:dAgo(25),
-       automationPaused:false,doNotContact:false},
-      {loanNo:"L-1004",borrowerName:"Daniel Kimani",product:"Personal",outstandingBalance:8000,
-       disbursedDate:dAgo(40),dueDate:dAgo(2),lastPaymentDate:null,lastActionDate:dAgo(2),
-       automationPaused:true,doNotContact:false},
-      {loanNo:"L-1005",borrowerName:"Esther Njeri",product:"Personal",outstandingBalance:9500,
-       disbursedDate:dAgo(45),dueDate:dAgo(2),lastPaymentDate:null,lastActionDate:dAgo(2),
-       automationPaused:false,doNotContact:true},
-    ],
-  };
+/* ---- interactions ---- */
+function simulatePayment(loanNo){
+  const runISO=$("runDate").value;
+  STATE.actions.push({loanNo,type:"Payment received",date:runISO});
+  const cs=STATE.cases.find(c=>c.loanNo===loanNo);
+  if(cs&&cs.status==="Open"){cs.status="ReviewToClose";cs.flagged=true;cs.reviewReason="Payment received — escalation stopped, review to close";}
+  addEvent(STATE,{loanNo,source:"payment",action:"Notify",channel:"InApp",status:"Sent",reason:`Payment received — escalation stopped for ${loanNo}`,runISO,triggerKey:`pay:${loanNo}:${runISO}:${STATE.events.length}`});
+  render(null);
 }
+function decide(id,approve){
+  const a=STATE.approvals.find(x=>x.id===id); if(!a||a.status!=="Pending")return;
+  const runISO=$("runDate").value, by="manager";
+  if(approve){a.status="Approved";a.decidedBy=by;
+    addEvent(STATE,{loanNo:a.loanNo,source:"crb",action:"FlagForCRB",channel:"InApp",status:"Sent",reason:`CRB submission approved by ${by} — CRB-${Math.random().toString(36).slice(2,10).toUpperCase()}`,runISO,triggerKey:`crb-ok:${id}`});
+  } else {a.status="Rejected";a.decidedBy=by;
+    addEvent(STATE,{loanNo:a.loanNo,source:"crb",action:"FlagForCRB",channel:"InApp",status:"Cancelled",reason:`CRB recommendation rejected by ${by}`,runISO,triggerKey:`crb-no:${id}`});
+  }
+  render(null);
+}
+window._pay=simulatePayment; window._decide=decide;
 
-/* ---- rendering ---- */
-let STATE = seed();
-const $ = (id) => document.getElementById(id);
-const tierClass = (t) => "b-" + t.toLowerCase().replace("-","");
-const money = (n) => "KES " + n.toLocaleString();
+/* ---- render ---- */
+let STATE=seed();
+const $=id=>document.getElementById(id);
+const tierClass=t=>"b-"+(t||"performing").toLowerCase().replace("-","");
+const money=n=>"KES "+n.toLocaleString();
 
 function render(summary){
-  // KPIs
-  const ev = STATE.events;
-  $("k-total").textContent = ev.length;
-  $("k-sched").textContent = ev.filter(e=>e.status==="Scheduled").length;
-  $("k-pending").textContent = ev.filter(e=>e.status==="Pending").length;
-  $("k-skipped").textContent = ev.filter(e=>e.status==="Skipped").length;
-  $("k-runs").textContent = STATE.runs;
+  const runISO=$("runDate").value;
+  STATE.loans.forEach(l=>retier(l,runISO));
+  const ev=STATE.events;
+  const pending=STATE.approvals.filter(a=>a.status==="Pending");
+  const review=STATE.cases.filter(c=>c.flagged).length;
+  const sent=ev.filter(e=>e.status==="Sent").length;
+  const items=ev.filter(e=>(e.status==="Sent"||e.status==="Scheduled")&&["SendReminder","SendPaymentLink","GenerateLetter"].includes(e.action)).length;
+  const mpi=Math.max(1,parseInt($("mpi").value||"4",10));
+  $("k-hours").textContent=(items*mpi/60).toFixed(1);
+  $("k-total").textContent=ev.length; $("k-sent").textContent=sent;
+  $("k-pending").textContent=pending.length; $("k-review").textContent=review; $("k-runs").textContent=STATE.runs;
+
+  // cases
+  $("casesTbl").querySelector("tbody").innerHTML = STATE.cases.length ? STATE.cases.map(c=>{
+    const canPay=c.status==="Open";
+    return `<tr><td>#${c.id}</td><td><code>${c.loanNo}</code></td>
+      <td><span class="badge ${tierClass(c.tier)}">${c.tier||"—"}</span></td>
+      <td>${c.stage||"—"}${c.flagged?'<span class="flag review">review</span>':''}</td>
+      <td>${c.status}${c.reviewReason?`<div class="sub" style="font-size:11px">${c.reviewReason}</div>`:''}</td>
+      <td>${canPay?`<button class="btn-ghost btn-sm" onclick="_pay('${c.loanNo}')">Simulate payment</button>`:'—'}</td></tr>`;
+  }).join("") : '<tr><td colspan="6" class="empty">Run the job to open cases.</td></tr>';
+
+  // approvals
+  $("apprTbl").querySelector("tbody").innerHTML = STATE.approvals.length ? STATE.approvals.map(a=>`
+    <tr><td><code>${a.loanNo}</code></td><td>${a.kind}</td>
+      <td class="reason">${a.reason}</td>
+      <td>${a.status==="Pending"
+        ? `<button class="btn-ok btn-sm" onclick="_decide(${a.id},true)">Approve</button>
+           <button class="btn-no btn-sm" onclick="_decide(${a.id},false)">Reject</button>`
+        : `<b>${a.status}</b> by ${a.decidedBy}`}</td></tr>`).join("")
+    : '<tr><td colspan="4" class="empty">No recommendations yet — escalate a Doubtful case to 21 days.</td></tr>';
 
   // loans
-  const runISO = $("runDate").value;
-  STATE.loans.forEach(l => retier(l, runISO));
   $("loansTbl").querySelector("tbody").innerHTML = STATE.loans.map(l=>{
-    const flags = (l.automationPaused?'<span class="flag paused">paused</span>':'')
-                + (l.doNotContact?'<span class="flag dnc">do-not-contact</span>':'');
-    return `<tr>
-      <td><code>${l.loanNo}</code></td><td>${l.borrowerName}</td><td>${l.product}</td>
+    const flags=(l.automationPaused?'<span class="flag paused">paused</span>':'')+(l.doNotContact?'<span class="flag dnc">do-not-contact</span>':'');
+    return `<tr><td><code>${l.loanNo}</code></td><td>${l.borrowerName}</td><td>${l.product}</td>
       <td>${money(l.outstandingBalance)}</td><td>${l.dpd}</td>
-      <td class="tier"><span class="badge ${tierClass(l.recoveryTier)}">${l.recoveryTier}</span></td>
+      <td><span class="badge ${tierClass(l.recoveryTier)}">${l.recoveryTier}</span></td>
       <td>${l.arrearsBucket}</td><td>${flags||'—'}</td></tr>`;
   }).join("");
 
-  // rules
-  $("rulesTbl").querySelector("tbody").innerHTML = STATE.rules.map(r=>`<tr>
-      <td>${r.id}</td><td>${r.name}</td>
-      <td><code>${JSON.stringify(r.condition)}</code></td>
-      <td>${r.action}</td><td>${r.channel}</td>
-      <td>${r.cooldownDays}d</td>
-      <td>${r.requiresApproval?'✔ manager':'—'}</td></tr>`).join("");
+  // by channel
+  const ch={};
+  ev.forEach(e=>{ch[e.channel]=ch[e.channel]||{};ch[e.channel][e.status]=(ch[e.channel][e.status]||0)+1;});
+  $("chanTbl").querySelector("tbody").innerHTML = Object.keys(ch).length ? Object.entries(ch).map(([k,v])=>
+    `<tr><td>${k}</td><td>${v.Sent||0}</td><td>${v.Scheduled||0}</td><td>${v.Skipped||0}</td><td>${v.Cancelled||0}</td></tr>`).join("")
+    : '<tr><td colspan="5" class="empty">—</td></tr>';
 
-  // events (newest first)
-  const body = $("eventsTbl").querySelector("tbody");
-  if (!ev.length){
-    body.innerHTML = '<tr><td colspan="7" class="empty">No events yet — run the job.</td></tr>';
-  } else {
-    body.innerHTML = ev.slice().reverse().map(e=>`<tr>
-      <td>${e.id}</td><td>${e.runISO}</td><td><code>${e.loanNo}</code></td>
-      <td>${e.ruleName}</td><td>${e.action} / ${e.channel}</td>
-      <td class="st st-${e.status}">${e.status}</td>
-      <td class="reason">${e.reason}</td></tr>`).join("");
-  }
+  // events
+  const body=$("eventsTbl").querySelector("tbody");
+  body.innerHTML = ev.length ? ev.slice().reverse().map(e=>`<tr>
+    <td>${e.id}</td><td>${e.runISO}</td><td><code>${e.loanNo}</code></td><td>${e.source}</td>
+    <td>${e.action} / ${e.channel}</td><td class="st st-${e.status}">${e.status}</td>
+    <td class="reason">${e.reason}</td></tr>`).join("")
+    : '<tr><td colspan="7" class="empty">No events yet — run the job.</td></tr>';
 
-  // run summary line
-  if (summary){
-    $("runline").innerHTML =
-      `Ran for <b>${summary.run_date}</b> — created <b>${summary.created}</b>, `+
-      `skipped <b>${summary.skipped_duplicate}</b> duplicate (idempotency), `+
-      `<b>${summary.skipped_cooldown}</b> in cooldown, `+
-      `<b>${summary.skipped_paused}</b> paused loan(s).`;
+  if(summary){
+    $("runline").innerHTML=`Ran for <b>${runISO}</b> — created <b>${summary.created}</b>, `+
+      `skipped <b>${summary.skipped_duplicate}</b> duplicate, <b>${summary.skipped_cooldown}</b> cooldown, `+
+      `<b>${summary.skipped_paused}</b> paused. Cases &amp; approvals update live.`;
   }
 }
 
-function run(){ const s = runDaily(STATE, $("runDate").value); render(s); }
-$("runBtn").onclick = run;
-$("againBtn").onclick = run;
-$("resetBtn").onclick = () => { STATE = seed();
-  $("runline").innerHTML = "Demo reset. Press <b>Run nightly job</b> to start again.";
-  render(null); };
-
+$("runBtn").onclick=()=>render(runDaily(STATE,$("runDate").value));
+$("skipBtn").onclick=()=>{const d=new Date(parse($("runDate").value).getTime()+7*DAY);$("runDate").value=iso(d);render(runDaily(STATE,$("runDate").value));};
+$("mpi").oninput=()=>render(null);
+$("resetBtn").onclick=()=>{STATE=seed();$("runDate").value="2026-07-23";$("runline").innerHTML="Demo reset. Press <b>Run nightly job</b> to start.";render(null);};
 render(null);
 </script>
 </body>
