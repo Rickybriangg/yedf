@@ -4,6 +4,11 @@
 the Milestone 1 engine (re-tiering + rule matching + `run_daily`), running with
 no server. The real Python API below runs the same logic locally.
 
+> Hosting: the demo is the single file [`docs/index.html`](docs/index.html),
+> published with GitHub Pages **branch deploy**. To turn it on once:
+> **Settings → Pages → Build and deployment → Source: “Deploy from a branch” →
+> Branch: `main` / `/docs` → Save.** No build step, no Actions, no keys.
+
 An automated recovery-workflow engine for RecoverIQ. The principle: automation
 handles high-volume, low-judgement work (reminders, routing, escalation, letter
 generation, payment links, CRB submission) so human officers only spend time on
