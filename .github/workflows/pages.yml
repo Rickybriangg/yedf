@@ -28,6 +28,8 @@ jobs:
 
       - name: Configure Pages (enables Pages if not already on)
         uses: actions/configure-pages@v5
+        with:
+          enablement: true
 
       - name: Upload static demo (the site/ folder)
         uses: actions/upload-pages-artifact@v3
