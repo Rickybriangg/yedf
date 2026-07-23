@@ -26,15 +26,17 @@ human-gated with an audit trail.
 
 | Milestone | Scope | State |
 |---|---|---|
-| **1** | **Rule engine + nightly re-tiering job** | ✅ **this delivery** |
-| 2 | Reminder scheduler (SMS/USSD, stubbed gateway) | ⏳ next |
-| 3 | Auto-escalation state machine | ⏳ |
-| 4 | Templated letter/SMS batch generation | ⏳ |
-| 5 | Payment-link / M-Pesa STK push (stubbed) | ⏳ |
-| 6 | CRB auto-submission trigger (recommend-only) | ⏳ |
-| 7 | Automation dashboard | ⏳ |
+| **1** | Rule engine + nightly re-tiering job | ✅ done |
+| **2** | Reminder scheduler (SMS/USSD, stubbed gateway) | ✅ done |
+| **3** | Auto-escalation state machine | ✅ done |
+| **4** | Templated letter/SMS batch generation | ✅ done |
+| **5** | Payment-link / M-Pesa STK push (stubbed) | ✅ done |
+| **6** | CRB auto-submission trigger (recommend-only) | ✅ done |
+| **7** | Automation dashboard | ✅ done |
 
-Build order is one milestone at a time, reviewed after each.
+All seven milestones are implemented and tested (`pytest` — 43 tests). Every
+external call (SMS, payment, CRB) sits behind an interface with a working
+offline stub; no provider credentials are wired.
 
 ## Quick start
 
@@ -111,25 +113,76 @@ Supported fact fields: `tier`, `arrearsBucket`, `dormancyDays`, `daysPastDue`,
 Operators: `eq ne gt gte lt lte in nin`. Unknown fields/operators are rejected
 loudly; a single broken rule is isolated and does not abort the run.
 
+## Milestones 2–7
+
+**M2 — Reminder scheduler.** `SmsGateway` interface with a `ConsoleSmsGateway`
+stub that logs the rendered message to the DB (`OutboundMessage`) instead of
+sending. Templates merge `{{borrowerName}}`, `{{loanNo}}`,
+`{{outstandingBalance}}`, `{{dueDate}}`, `{{paymentLink}}`. `GET
+/api/reminders/preview?date=` is a **read-only dry run** — the exact loans and
+exact rendered text that *would* send, before anything sends. `doNotContact` is
+checked at send time. `GET /api/reminders/calendar` groups scheduled sends by
+tier/product/day.
+
+**M3 — Escalation state machine.** `EscalationPath` rows store ordered stages
+per tier with day-offsets (tunable data, not code). The nightly job advances a
+`RecoveryCase` to the next stage once the offset elapses **and** no
+payment/response is logged since it entered the stage; a payment stops
+advancement and flags the case *ReviewToClose*; a case stuck 2× its dwell is
+flagged for manager review. `GET /api/cases`.
+
+**M4 — Batch generation.** `POST /api/batch/letters` over a worklist (`tier` or
+explicit `loanNos`) produces one merged **PDF per account** (offline, fpdf2) +
+a zip, logging an `AutomationEvent` per account. `POST /api/batch/sms` emits a
+merged CSV (opt-outs excluded). Template CRUD + live preview at
+`/api/templates` and `POST /api/templates/{id}/preview`.
+
+**M5 — Payment links.** `PaymentProvider` interface + `StubPaymentProvider`
+simulating an STK push. `{{paymentLink}}` is generated fresh per send.
+`POST /api/payments/callback` (or visiting `/pay/{token}` in dev) marks the
+`PaymentLink` Paid, auto-creates a `RecoveryAction` "Payment received", and
+**stops escalation** on the case. Idempotent — a repeat callback is a no-op.
+
+**M6 — CRB, recommend-only.** A `FlagForCRB` rule (or the Doubtful CRB
+escalation stage) creates a **pending `ApprovalTask`**, never a live submission.
+A Manager approves/rejects via `POST /api/approvals/{id}/approve|reject`. Only on
+approval is a stubbed `CrbSubmission` created and a `Sent` event logged,
+attributed to the approver. Rejection logs the reason. Nothing reaches
+"submitted" without a human click.
+
+**M7 — Dashboard.** `GET /api/dashboard` returns rules with last-fired counts,
+scheduled sends today/this week, success/failure by channel, pending approvals,
+paused loans, cases flagged for review, and the KPI *"hours of manual work
+automated this week"* = (reminders + letters) × editable `minutesPerItem`,
+clearly labelled an estimate. `GET /api/automation/events?q=&status=` is the
+searchable audit log. A live client-side version is the GitHub Pages demo.
+
 ## Data model
 
-`app/models.py`: `Loan`, `RecoveryCase` (minimal scaffold) plus the
-automation tables `AutomationRule`, `AutomationEvent` (append-only audit),
-`MessageTemplate`. `PaymentLink` / `EscalationPath` / `CrbSubmission` arrive
-with their milestones.
+`app/models.py`: `Loan`, `RecoveryCase` (escalation state) plus `AutomationRule`,
+`AutomationEvent` (append-only audit), `MessageTemplate`, `OutboundMessage`,
+`RecoveryAction`, `PaymentLink`, `EscalationPath`, `ApprovalTask`,
+`CrbSubmission`. Provider seams live in `app/gateways.py`.
 
 ## Tests
 
-`pytest -q` — 26 tests covering the acceptance-critical logic:
+`pytest -q` — 43 tests covering the acceptance-critical logic:
 
 - **rule matching** — tier, day-range, membership, multi-key AND, bad
   field/operator rejection, type-mismatch handling;
 - **cooldown** respected across days (and `cooldown=0` allows daily);
 - **idempotent re-run** — same-day re-run adds nothing;
 - **paused-loan skip** — silent, no event;
-- **opt-out enforcement** — `doNotContact` → `Skipped`, and it does *not* block
-  non-contact channels;
-- **recommend-only** — `requiresApproval` never auto-`Sent`.
+- **opt-out enforcement** — `doNotContact` → `Skipped`, honoured in reminders,
+  preview and SMS batch;
+- **gateway** logs the rendered message instead of sending;
+- **escalation** — advances on schedule, a logged payment stops it and flags
+  the case, a stalled case is flagged for review;
+- **batch** — a PDF + audit event per account; SMS CSV excludes opt-outs;
+- **payments** — callback marks Paid, stops escalation, idempotent;
+- **CRB recommend-only** — pending task not submission; approve creates an
+  attributed submission; reject logs the reason; tasks de-duped across runs;
+- **dashboard** — KPI estimate math and searchable event log.
 
 ## Guardrails
 

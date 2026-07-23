@@ -23,8 +23,9 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app import tiering
+from app.dispatch import dispatch_rule_event
+from app.escalation import advance_cases
 from app.models import (
-    CONTACT_CHANNELS,
     AutomationEvent,
     AutomationRule,
     Loan,
@@ -84,25 +85,14 @@ def _last_fired(session: Session, rule_id: int, loan_no: str) -> Optional[Automa
     return session.execute(stmt).scalars().first()
 
 
-def _dispatch_status(rule: AutomationRule, loan: Loan, facts: dict[str, Any]) -> tuple[str, str]:
-    """Decide the event's status + reason at the last possible moment.
+def run_daily(
+    session: Session, run_date: Optional[date] = None, base_url: str = ""
+) -> dict[str, Any]:
+    """Execute the nightly job. Returns a summary of what happened and why.
 
-    Milestone 1 has no live gateway (that is Milestone 2), so contact actions
-    become 'Scheduled'. Two guardrails are applied here, right before send:
-      * doNotContact on a contact channel  -> Skipped (opt-out respected).
-      * requiresApproval (e.g. FlagForCRB)  -> Scheduled as a pending
-        recommendation; it is never auto-fired.
+    Order: (1) re-tier every loan, (2) evaluate rules and dispatch actions via
+    the (stubbed) gateways, (3) advance the escalation state machine.
     """
-    reason = _explain(rule, facts)
-    if rule.channel in CONTACT_CHANNELS and loan.do_not_contact:
-        return "Skipped", f"Opt-out (doNotContact) — {reason}"
-    if rule.requires_approval:
-        return "Scheduled", f"Pending manager approval — {reason}"
-    return "Scheduled", reason
-
-
-def run_daily(session: Session, run_date: Optional[date] = None) -> dict[str, Any]:
-    """Execute the nightly job. Returns a summary of what happened and why."""
     today = run_date or date.today()
     triggered_at = datetime.combine(today, datetime.min.time())
 
@@ -167,24 +157,32 @@ def run_daily(session: Session, run_date: Optional[date] = None) -> dict[str, An
                         summary["skipped_cooldown"] += 1
                         continue
 
-            status, reason = _dispatch_status(rule, loan, facts)
             event = AutomationEvent(
                 loan_no=loan.loan_no,
                 rule_id=rule.id,
+                source="rule",
                 triggered_at=triggered_at,
                 action=rule.action,
                 channel=rule.channel,
                 payload={"facts": facts, "template_id": rule.template_id},
-                status=status,
-                reason=reason,
+                status="Scheduled",
+                reason="",
                 trigger_key=trigger_key,
             )
             session.add(event)
-            session.flush()  # surface UNIQUE + make visible to in-run dedup checks
+            session.flush()  # surface UNIQUE + give the event an id for side effects
+
+            # Perform the action (send via stub gateway / create link / raise
+            # approval task) and set the final status + reason.
+            dispatch_rule_event(session, rule, loan, facts, event, base_url=base_url)
+            session.flush()
 
             summary["created"] += 1
-            summary["by_status"][status] = summary["by_status"].get(status, 0) + 1
+            summary["by_status"][event.status] = summary["by_status"].get(event.status, 0) + 1
             summary["by_rule"][rule.name] = summary["by_rule"].get(rule.name, 0) + 1
+
+    # Step 4 — advance the escalation state machine for every open case.
+    advance_cases(session, today, summary)
 
     session.commit()
     return summary

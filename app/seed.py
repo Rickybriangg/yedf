@@ -9,10 +9,16 @@ from datetime import date, timedelta
 
 from app.database import SessionLocal, init_db
 from app.models import (
+    ApprovalTask,
     AutomationEvent,
     AutomationRule,
+    CrbSubmission,
+    EscalationPath,
     Loan,
     MessageTemplate,
+    OutboundMessage,
+    PaymentLink,
+    RecoveryAction,
     RecoveryCase,
 )
 
@@ -25,12 +31,39 @@ def _d(days_ago: int) -> date:
 
 def seed(session) -> None:
     # Clear (order matters for FKs).
+    session.query(CrbSubmission).delete()
+    session.query(ApprovalTask).delete()
+    session.query(OutboundMessage).delete()
+    session.query(PaymentLink).delete()
+    session.query(RecoveryAction).delete()
     session.query(AutomationEvent).delete()
     session.query(RecoveryCase).delete()
+    session.query(EscalationPath).delete()
     session.query(AutomationRule).delete()
     session.query(MessageTemplate).delete()
     session.query(Loan).delete()
     session.flush()
+
+    # --- Escalation paths (configurable per tier; day-offsets tunable) -------
+    session.add_all([
+        EscalationPath(tier="Curable", stages=[
+            {"label": "SMS reminder", "action": "SendReminder", "channel": "SMS", "offsetDays": 0},
+            {"label": "SMS follow-up", "action": "SendReminder", "channel": "SMS", "offsetDays": 3},
+        ]),
+        EscalationPath(tier="At-risk", stages=[
+            {"label": "SMS reminder", "action": "SendReminder", "channel": "SMS", "offsetDays": 0},
+            {"label": "Call task", "action": "Call-task", "channel": "InApp", "offsetDays": 3},
+            {"label": "Demand letter", "action": "GenerateLetter", "channel": "Letter", "offsetDays": 10},
+        ]),
+        EscalationPath(tier="Doubtful", stages=[
+            {"label": "Demand letter", "action": "GenerateLetter", "channel": "Letter", "offsetDays": 0},
+            {"label": "Guarantor contact", "action": "GuarantorContact", "channel": "InApp", "offsetDays": 7},
+            {"label": "CRB recommendation", "action": "CRB-recommend", "channel": "InApp", "offsetDays": 21},
+        ]),
+        EscalationPath(tier="Impaired", stages=[
+            {"label": "Legal handoff recommendation", "action": "LegalHandoff-recommend", "channel": "InApp", "offsetDays": 0},
+        ]),
+    ])
 
     # --- Templates -----------------------------------------------------------
     t_reminder = MessageTemplate(

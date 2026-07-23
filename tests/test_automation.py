@@ -25,9 +25,10 @@ def test_matching_rule_creates_event(session, make_loan, make_rule):
     make_rule(condition={"tier": "Curable"})
     summary = run_daily(session, run_date=TODAY)
     assert summary["created"] == 1
-    events = _events(session)
+    events = [e for e in _events(session) if e.source == "rule"]
     assert len(events) == 1
-    assert events[0].status == "Scheduled"
+    # An SMS reminder is delivered immediately by the stub gateway -> Sent.
+    assert events[0].status == "Sent"
     assert events[0].loan_no == "L-1"
     assert "Matched rule" in events[0].reason
 
@@ -99,7 +100,7 @@ def test_opt_out_does_not_block_non_contact_channel(session, make_loan, make_rul
     run_daily(session, run_date=TODAY)
     events = _events(session)
     assert len(events) == 1
-    assert events[0].status == "Scheduled"
+    assert events[0].status == "Sent"  # in-app notify delivered immediately
 
 
 def test_requires_approval_is_not_auto_fired(session, make_loan, make_rule):
